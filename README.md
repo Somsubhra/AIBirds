@@ -8,4 +8,4 @@ Build and Run
 =======
 - ant compile
 - ant jar
-- java -jar ABSoftware.jar -na <stage_number>
+- java -jar ABSoftware.jar -na stage_number
