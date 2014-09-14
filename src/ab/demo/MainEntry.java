@@ -28,7 +28,7 @@ public class MainEntry {
 				na.run();
 			}
             else
-                if(command.equalsIgnoreCase("-xa"))
+                if(args.length == 1 && command.equalsIgnoreCase("-xa"))
                 {
                     XAgent xa = new XAgent();
                     xa.run();
