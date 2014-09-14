@@ -38,7 +38,62 @@ public class XAgent implements Runnable {
     }
 
     public void run() {
+
         aRobot.loadLevel(currentLevel);
+
+        while (true) {
+            GameState state = solve();
+            if (state == GameState.WON) {
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                int score = StateUtil.getScore(ActionRobot.proxy);
+                if(!scores.containsKey(currentLevel))
+                    scores.put(currentLevel, score);
+                else
+                {
+                    if(scores.get(currentLevel) < score)
+                        scores.put(currentLevel, score);
+                }
+                int totalScore = 0;
+                for(Integer key: scores.keySet()){
+
+                    totalScore += scores.get(key);
+                    System.out.println(" Level " + key
+                            + " Score: " + scores.get(key) + " ");
+                }
+                System.out.println("Total Score: " + totalScore);
+                aRobot.loadLevel(++currentLevel);
+                // make a new trajectory planner whenever a new level is entered
+                tp = new TrajectoryPlanner();
+
+                // first shot on this level, try high shot first
+                firstShot = true;
+            } else if (state == GameState.LOST) {
+                System.out.println("Restart");
+                aRobot.restartLevel();
+            } else if (state == GameState.LEVEL_SELECTION) {
+                System.out
+                        .println("Unexpected level selection page, go to the last current level : "
+                                + currentLevel);
+                aRobot.loadLevel(currentLevel);
+            } else if (state == GameState.MAIN_MENU) {
+                System.out
+                        .println("Unexpected main menu page, go to the last current level : "
+                                + currentLevel);
+                ActionRobot.GoFromMainMenuToLevelSelection();
+                aRobot.loadLevel(currentLevel);
+            } else if (state == GameState.EPISODE_MENU) {
+                System.out
+                        .println("Unexpected episode menu page, go to the last current level : "
+                                + currentLevel);
+                ActionRobot.GoFromMainMenuToLevelSelection();
+                aRobot.loadLevel(currentLevel);
+            }
+
+        }
     }
 
     private double distance(Point p1, Point p2) {
