@@ -1,3 +1,5 @@
 *.class
 ABSoftware.jar
 ABServer.jar
+*.iml
+.idea/
