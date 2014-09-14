@@ -38,7 +38,7 @@ public class XAgent implements Runnable {
     }
 
     public void run() {
-
+        aRobot.loadLevel(currentLevel);
     }
 
     private double distance(Point p1, Point p2) {
