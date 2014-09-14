@@ -65,50 +65,98 @@ public class MainEntry {
                                     }
 
                                 else
-                            if (args.length == 2 && command.equalsIgnoreCase("-na"))
+                            if (args.length == 2)
                             {
-                                NaiveAgent na = new NaiveAgent();
-                                if(! (args[1].equalsIgnoreCase("-showMBR") || args[1].equals("-showReal")))
-                                {
-                                    int initialLevel = 1;
-                                    try{
-                                        initialLevel = Integer.parseInt(args[1]);
-                                    }
-                                    catch (NumberFormatException e)
+                                if(command.equalsIgnoreCase("-na")) {
+                                    NaiveAgent na = new NaiveAgent();
+                                    if(! (args[1].equalsIgnoreCase("-showMBR") || args[1].equals("-showReal")))
                                     {
+                                        int initialLevel = 1;
+                                        try{
+                                            initialLevel = Integer.parseInt(args[1]);
+                                        }
+                                        catch (NumberFormatException e)
+                                        {
+                                            System.out.println("wrong level number, will use the default one");
+                                        }
+                                        na.currentLevel = initialLevel;
+                                        na.run();
+                                    }
+                                    else
+                                    {
+                                        Thread nathre = new Thread(na);
+                                        nathre.start();
+                                        if(args[1].equalsIgnoreCase("-showReal"))
+                                            ShowSeg.useRealshape = true;
+                                        Thread thre = new Thread(new ShowSeg());
+                                        thre.start();
+                                    }
+                                }
+
+                                else if(command.equalsIgnoreCase("-xa")) {
+                                    XAgent xa = new XAgent();
+                                    if(! (args[1].equalsIgnoreCase("-showMBR") || args[1].equals("-showReal")))
+                                    {
+                                        int initialLevel = 1;
+                                        try{
+                                            initialLevel = Integer.parseInt(args[1]);
+                                        }
+                                        catch (NumberFormatException e)
+                                        {
+                                            System.out.println("wrong level number, will use the default one");
+                                        }
+                                        xa.currentLevel = initialLevel;
+                                        xa.run();
+                                    }
+                                    else
+                                    {
+                                        Thread nathre = new Thread(xa);
+                                        nathre.start();
+                                        if(args[1].equalsIgnoreCase("-showReal"))
+                                            ShowSeg.useRealshape = true;
+                                        Thread thre = new Thread(new ShowSeg());
+                                        thre.start();
+                                    }
+
+                                } else {
+                                    // Arg not recognized
+                                }
+                            }
+                            else if (args.length == 3 && (args[2].equalsIgnoreCase("-showMBR") || args[2].equalsIgnoreCase("-showReal")))
+                            {
+                                if (command.equalsIgnoreCase("-na")) {
+                                    NaiveAgent na = new NaiveAgent();
+                                    int initialLevel = 1;
+                                    try {
+                                        initialLevel = Integer.parseInt(args[1]);
+                                    } catch (NumberFormatException e) {
                                         System.out.println("wrong level number, will use the default one");
                                     }
                                     na.currentLevel = initialLevel;
-                                    na.run();
-                                }
-                                else
-                                {
                                     Thread nathre = new Thread(na);
                                     nathre.start();
-                                    if(args[1].equalsIgnoreCase("-showReal"))
+                                    if (args[2].equalsIgnoreCase("-showReal"))
                                         ShowSeg.useRealshape = true;
                                     Thread thre = new Thread(new ShowSeg());
                                     thre.start();
+                                } else if(command.equalsIgnoreCase("-xa")) {
+                                    XAgent xa = new XAgent();
+                                    int initialLevel = 1;
+                                    try {
+                                        initialLevel = Integer.parseInt(args[1]);
+                                    } catch (NumberFormatException e) {
+                                        System.out.println("wrong level number, will use the default one");
+                                    }
+                                    xa.currentLevel = initialLevel;
+                                    Thread nathre = new Thread(xa);
+                                    nathre.start();
+                                    if (args[2].equalsIgnoreCase("-showReal"))
+                                        ShowSeg.useRealshape = true;
+                                    Thread thre = new Thread(new ShowSeg());
+                                    thre.start();
+                                } else {
+                                    // Arg not recognized
                                 }
-                            }
-                            else if (args.length == 3 && (args[2].equalsIgnoreCase("-showMBR") || args[2].equalsIgnoreCase("-showReal")) && command.equalsIgnoreCase("-na"))
-                            {
-                                NaiveAgent na = new NaiveAgent();
-                                int initialLevel = 1;
-                                try{
-                                    initialLevel = Integer.parseInt(args[1]);
-                                }
-                                catch (NumberFormatException e)
-                                {
-                                    System.out.println("wrong level number, will use the default one");
-                                }
-                                na.currentLevel = initialLevel;
-                                Thread nathre = new Thread(na);
-                                nathre.start();
-                                if(args[2].equalsIgnoreCase("-showReal"))
-                                    ShowSeg.useRealshape = true;
-                                Thread thre = new Thread(new ShowSeg());
-                                thre.start();
 
                             }
 
