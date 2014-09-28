@@ -19,9 +19,6 @@ import ab.vision.ABType;
 import ab.vision.GameStateExtractor.GameState;
 import ab.vision.Vision;
 
-import javax.swing.*;
-import javax.swing.text.StringContent;
-
 public class XAgent implements Runnable {
 
     private ActionRobot aRobot;
