@@ -14,10 +14,13 @@ import ab.demo.other.Shot;
 import ab.planner.TrajectoryPlanner;
 import ab.utils.StateUtil;
 import ab.vision.ABObject;
+import ab.vision.ABShape;
+import ab.vision.ABType;
 import ab.vision.GameStateExtractor.GameState;
 import ab.vision.Vision;
 
 import javax.swing.*;
+import javax.swing.text.StringContent;
 
 public class XAgent implements Runnable {
 
@@ -104,6 +107,92 @@ public class XAgent implements Runnable {
                         * (p1.y - p2.y)));
     }
 
+    /**
+     * The class/structure representing a block
+     */
+    private class ABBlock {
+
+        /**
+         * The block number
+         */
+        public int number;
+
+        /**
+         * The shape of the block
+         */
+        public String shape;
+
+        /**
+         * The material of the block
+         */
+        public String material;
+
+        /**
+         * Dump the variables on screen
+         */
+        public void dumpVars() {
+            System.out.println("Block number: " + number);
+            System.out.println("Block shape: " + shape);
+            System.out.println("Block material: " + material);
+            System.out.println();
+        }
+    }
+
+    /**
+     * Get all the blocks in the scene
+     * @param vision The vision object of the scene
+     * @return A list of blocks
+     */
+    private List<ABBlock> blocks(Vision vision) {
+
+        // Find all the blocks appearing in the scene
+        List<ABObject> objectsList = vision.findBlocksMBR();
+
+        List<ABBlock> blocksList = new ArrayList<ABBlock>();
+
+        // Iterate through all the blocks
+        for(ABObject object : objectsList) {
+
+            ABBlock block = new ABBlock();
+
+            // Set the block number
+            block.number = object.id;
+
+            // Set the block shape
+            ABShape shape = object.shape;
+
+            if(shape == ABShape.Circle) {
+                block.shape = "Circle";
+            } else if(shape == ABShape.Poly) {
+                block.shape = "Polygon";
+            } else if(shape == ABShape.Rect) {
+                block.shape = "Rectangle";
+            } else if(shape == ABShape.Triangle) {
+                block.shape = "Triangle";
+            } else {
+                block.shape = "Unknown";
+            }
+
+            // Set the block material
+            ABType material = object.type;
+
+            if(material == ABType.Stone) {
+                block.material = "Stone";
+            } else if(material == ABType.Wood) {
+                block.material = "Wood";
+            } else if(material == ABType.Ice) {
+                block.material = "Ice";
+            } else {
+                block.material = "Unknown";
+            }
+
+            // Append the block to the list
+            blocksList.add(block);
+        }
+
+        return blocksList;
+    }
+
     public GameState solve() {
 
         // Capture the image
@@ -121,6 +210,14 @@ public class XAgent implements Runnable {
             screenshot = ActionRobot.doScreenShot();
             vision = new Vision(screenshot);
             sling = vision.findSlingshotMBR();
+        }
+
+        // Get all the blocks
+        List<ABBlock> blocks = this.blocks(vision);
+
+        // Dump the block objects on console
+        for(ABBlock block : blocks) {
+            block.dumpVars();
         }
 
         // Get all the pigs
