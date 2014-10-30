@@ -192,6 +192,8 @@ public class XAgent implements Runnable {
 
     public GameState solve() {
 
+        System.out.println("Solving");
+
         // Capture the image
         BufferedImage screenshot = ActionRobot.doScreenShot();
 

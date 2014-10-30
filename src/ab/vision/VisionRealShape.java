@@ -3,9 +3,8 @@
  ** Copyright (c) 2014, XiaoYu (Gary) Ge, Stephen Gould, Jochen Renz
  **  Sahan Abeyasinghe,Jim Keys,  Andrew Wang, Peng Zhang
  ** All rights reserved.
- **This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License. 
- **To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ 
- *or send a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
+**This work is licensed under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+**To view a copy of this license, visit http://www.gnu.org/licenses/
  *****************************************************************************/
  
 package ab.vision;
@@ -85,14 +84,15 @@ public class VisionRealShape
     {
         if (_sling != null) return _sling;
         
-        // use the highest sling typed component
+        // use the highest sling typed component: e.g. frame
         int minY = 999999;
         ConnectedComponent sling = null;
         for (ConnectedComponent c : _components)
         {
             int top = c.boundingBox()[1];
+            int left = c.boundingBox()[0];
             if (c.getType() == ImageSegmenter.SLING 
-                && top < minY)
+                && top < minY && left < 300)
             {
                 minY = top;
                 sling = c;
@@ -346,8 +346,10 @@ public class VisionRealShape
 		BufferedImage screenshot = ActionRobot.doScreenShot();
 		Vision vision = new Vision(screenshot);
 		//List<ABObject> objs = vision.findBlocksRealShape();
-		List<ABObject> objs = vision.findHills();
-		for (ABObject obj : objs)
-			System.out.println(obj);
+		//List<ABObject> objs = vision.findHills();
+		Rectangle obj = vision.findSlingshotMBR();
+		System.out.println(obj);
+//		for (ABObject obj : objs)
+//			System.out.println(obj);
 	}
 }

@@ -3,9 +3,8 @@
  ** Copyright (c) 2014, XiaoYu (Gary) Ge, Stephen Gould, Jochen Renz
  **  Sahan Abeyasinghe,Jim Keys,  Andrew Wang, Peng Zhang
  ** All rights reserved.
- **This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License. 
- **To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ 
- *or send a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
+**This work is licensed under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+**To view a copy of this license, visit http://www.gnu.org/licenses/
  *****************************************************************************/
 package ab.demo;
 
@@ -73,13 +72,13 @@ public class ClientNaiveAgent implements Runnable {
 	{
 		int level = 0;
 		boolean unsolved = false;
-		//all the levels have been solved, then get the first unsolved level
+		//all the level have been solved, then get the first unsolved level
 		for (int i = 0; i < solved.length; i++)
 		{
 			if(solved[i] == 0 )
 			{
 					unsolved = true;
-					level = (byte)(i + 1);
+					level = i + 1;
 					if(level <= currentLevel && currentLevel < solved.length)
 						continue;
 					else
@@ -88,27 +87,36 @@ public class ClientNaiveAgent implements Runnable {
 		}
 		if(unsolved)
 			return level;
-	    level = (byte)((this.currentLevel + 1)%solved.length);
+	    level = (currentLevel + 1)%solved.length;
 		if(level == 0)
 			level = solved.length;
 		return level; 
 	}
-
     /* 
      * Run the Client (Naive Agent)
      */
+	private void checkMyScore()
+	{
+		
+		int[] scores = ar.checkMyScore();
+		System.out.println(" My score: ");
+		int level = 1;
+		for(int i: scores)
+		{
+			System.out.println(" level " + level + "  " + i);
+			if (i > 0)
+				solved[level - 1] = 1;
+			level ++;
+		}
+	}
 	public void run() {	
 		byte[] info = ar.configure(ClientActionRobot.intToByteArray(id));
 		solved = new int[info[2]];
 		
 		//load the initial level (default 1)
 		//Check my score
-		int[] _scores = ar.checkMyScore();
-		int counter = 0;
-		for(int i: _scores)
-		{
-			System.out.println(" level " + ++counter + "  " + i);
-		}
+		checkMyScore();
+		
 		currentLevel = (byte)getNextLevel(); 
 		ar.loadLevel(currentLevel);
 		//ar.loadLevel((byte)9);
@@ -116,28 +124,18 @@ public class ClientNaiveAgent implements Runnable {
 		while (true) {
 			
 			state = solve();
-			
 			//If the level is solved , go to the next level
 			if (state == GameState.WON) {
 							
 				///System.out.println(" loading the level " + (currentLevel + 1) );
-				System.out.println(" My score: ");
-				int[] scores = ar.checkMyScore();
-				for (int i = 0; i < scores.length ; i ++)
-				{
-				   
-				    	  System.out.print( " level " + (i+1) + ": " + scores[i]);
-				    		if(scores[i] > 0)
-								solved[i] = 1;
-				    		
-				}
+				checkMyScore();
 				System.out.println();
 				currentLevel = (byte)getNextLevel(); 
 				ar.loadLevel(currentLevel);
 				//ar.loadLevel((byte)9);
 				//display the global best scores
-				scores = ar.checkScore();
-				System.out.println("The global best score: ");
+				int[] scores = ar.checkScore();
+				System.out.println("Global best score: ");
 				for (int i = 0; i < scores.length ; i ++)
 				{
 				
@@ -290,9 +288,9 @@ public class ClientNaiveAgent implements Runnable {
 							case YellowBird:
 								tapInterval = 65 + randomGenerator.nextInt(25);break; // 65-90% of the way
 							case WhiteBird:
-								tapInterval =  70 + randomGenerator.nextInt(20);break; // 70-90% of the way
+								tapInterval =  50 + randomGenerator.nextInt(20);break; // 50-70% of the way
 							case BlackBird:
-								tapInterval =  70 + randomGenerator.nextInt(20);break; // 70-90% of the way
+								tapInterval =  0;break; // 70-90% of the way
 							case BlueBird:
 								tapInterval =  65 + randomGenerator.nextInt(20);break; // 65-85% of the way
 							default:
@@ -322,7 +320,9 @@ public class ClientNaiveAgent implements Runnable {
 							int dy = (int) releasePoint.getY() - refPoint.y;
 							if(dx < 0)
 							{
+								long timer = System.currentTimeMillis();
 								ar.shoot(refPoint.x, refPoint.y, dx, dy, 0, tapTime, false);
+								System.out.println("It takes " + (System.currentTimeMillis() - timer) + " ms to take a shot");
 								state = ar.checkState();
 								if ( state == GameState.PLAYING )
 								{
