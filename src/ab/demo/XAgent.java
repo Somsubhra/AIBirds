@@ -214,11 +214,6 @@ public class XAgent implements Runnable {
         // Get all the blocks
         List<ABBlock> blocks = this.blocks(vision);
 
-        // Dump the block objects on console
-        for(ABBlock block : blocks) {
-            block.dumpVars();
-        }
-
         // Get all the pigs
         List<ABObject> pigs = vision.findPigsMBR();
 
@@ -266,6 +261,8 @@ public class XAgent implements Runnable {
                         _tpt.y = _tpt.y + (int) (Math.sin(_angle) * 10);
                         System.out.println("Randomly changing to " + _tpt);
                     }
+
+                    System.out.println("x: " + _tpt.x + ", y: " + _tpt.y);
 
                     prevTarget = new Point(_tpt.x, _tpt.y);
 
