@@ -205,14 +205,17 @@ public class XAgent implements Runnable {
 
                 // TODO: Calculate the release points
                 // and return the best possible release point
+
+                List<Point> pts = tp.estimateLaunchPoint(vision.findSlingshotMBR(), targetPoint);
+
+                System.out.println(pts);
+
             }
         }
         return null;
     }
 
     public GameState solve() {
-
-        System.out.println("Solving");
 
         // Capture the image
         BufferedImage screenshot = ActionRobot.doScreenShot();
@@ -240,6 +243,8 @@ public class XAgent implements Runnable {
         // Get all the pigs
         List<ABObject> pigs = vision.findPigsMBR();
 
+        this.getReleasePoint(vision, screenshot, pigs, blocks);
+        
         GameState state = aRobot.getState();
 
         // If there is a sling, play else skip
