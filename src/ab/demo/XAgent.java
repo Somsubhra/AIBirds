@@ -262,8 +262,6 @@ public class XAgent implements Runnable {
                         System.out.println("Randomly changing to " + _tpt);
                     }
 
-                    System.out.println("x: " + _tpt.x + ", y: " + _tpt.y);
-
                     prevTarget = new Point(_tpt.x, _tpt.y);
 
                     // Estimate the trajectory

@@ -1,3 +1,3 @@
 ant compile
 ant jar
-java -jar ABSoftware.jar -xa
+java -jar ABSoftware.jar -xa -showMBR
