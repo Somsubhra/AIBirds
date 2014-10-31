@@ -190,12 +190,35 @@ public class XAgent implements Runnable {
         return blocksList;
     }
 
+    public Point getReleasePoint(Vision vision, BufferedImage screenShot, List<ABObject> pigs, List<ABBlock> blocks) {
+
+        // Get the dimensions of the scene
+        int screenWidth = screenShot.getWidth();
+        int screenHeight = screenShot.getHeight();
+
+        // Traverse the entire trajectory space
+        for(int x = 0; x < screenWidth; x++) {
+            for(int y = 0; y < screenHeight; y++) {
+
+                // The target point in the trajectory space
+                Point targetPoint = new Point(x, y);
+
+                // TODO: Calculate the release points
+                // and return the best possible release point
+            }
+        }
+        return null;
+    }
+
     public GameState solve() {
 
         System.out.println("Solving");
 
         // Capture the image
         BufferedImage screenshot = ActionRobot.doScreenShot();
+
+        int sceneWidth = screenshot.getWidth();
+        int sceneHeight = screenshot.getHeight();
 
         // Process the image
         Vision vision = new Vision(screenshot);
@@ -229,29 +252,7 @@ public class XAgent implements Runnable {
                 int dx, dy;
 
                 {
-                    // Pick up the topmost pig
-
-                    int numberOfPigs = pigs.size();
-
-                    ABObject topmostPig = null;
-
-                    if(numberOfPigs > 0) {
-
-                        topmostPig = pigs.get(0);
-
-                        for (int index = 1; index < numberOfPigs; index++) {
-
-                            ABObject currentPig = pigs.get(index);
-
-                            // If the current top most pig has y co-ordinate greater than the other pig
-                            // then the other pig is at a greater height
-                            if(topmostPig.getCenter().getY() > currentPig.getCenter().getY()) {
-                                topmostPig = currentPig;
-                            }
-                        }
-                    }
-
-                    Point _tpt = topmostPig.getCenter();
+                    Point _tpt = new Point(sceneWidth / 2, sceneHeight / 2);
 
                     // If the target is very close to before, randomly choose a
                     // point near it
@@ -276,8 +277,12 @@ public class XAgent implements Runnable {
                         releasePoint = pts.get(0);
                     else if (pts.size() == 2)
                     {
-                        // Choose the trajectory with the higher angle
-                        releasePoint = pts.get(1);
+                        // randomly choose between the trajectories, with a 1 in
+                        // 6 chance of choosing the high one
+                        if (randomGenerator.nextInt(6) == 0)
+                            releasePoint = pts.get(1);
+                        else
+                            releasePoint = pts.get(0);
                     }
                     else
                     if(pts.isEmpty())
