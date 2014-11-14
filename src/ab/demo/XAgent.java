@@ -190,29 +190,27 @@ public class XAgent implements Runnable {
         return blocksList;
     }
 
-    public Point getReleasePoint(Vision vision, BufferedImage screenShot, List<ABObject> pigs, List<ABBlock> blocks) {
+    public ArrayList<Point> getReleasePoint(Vision vision, BufferedImage screenShot, List<ABObject> pigs, List<ABBlock> blocks) {
 
-        // Get the dimensions of the scene
-        int screenWidth = screenShot.getWidth();
-        int screenHeight = screenShot.getHeight();
+        ArrayList<Point> result = new ArrayList<Point>();
 
-        // Traverse the entire trajectory space
-        for(int x = 0; x < screenWidth; x++) {
-            for(int y = 0; y < screenHeight; y++) {
+        int numberOfPigs = pigs.size();
 
-                // The target point in the trajectory space
-                Point targetPoint = new Point(x, y);
+        ArrayList<Point> pts;
 
-                // TODO: Calculate the release points
-                // and return the best possible release point
+        // Traverse the entire trajectory space based on the pigs
+        for(int index = 0; index < numberOfPigs; index++) {
+            ABObject pig = pigs.get(index);
 
-                List<Point> pts = tp.estimateLaunchPoint(vision.findSlingshotMBR(), targetPoint);
+            Point targetPoint = pig.getCenter();
 
-                System.out.println(pts);
+            pts = tp.estimateLaunchPoint(vision.findSlingshotMBR(), targetPoint);
 
-            }
+            result.add(pts.get(0));
+            result.add(targetPoint);
         }
-        return null;
+
+        return result;
     }
 
     public GameState solve() {
@@ -243,8 +241,6 @@ public class XAgent implements Runnable {
         // Get all the pigs
         List<ABObject> pigs = vision.findPigsMBR();
 
-        this.getReleasePoint(vision, screenshot, pigs, blocks);
-        
         GameState state = aRobot.getState();
 
         // If there is a sling, play else skip
@@ -253,48 +249,17 @@ public class XAgent implements Runnable {
             if(!pigs.isEmpty()) {
 
                 Point releasePoint = null;
+                Point targetPoint = null;
+
                 Shot shot = new Shot();
                 int dx, dy;
 
                 {
-                    Point _tpt = new Point(sceneWidth / 2, sceneHeight / 2);
+                    ArrayList<Point> result = this.getReleasePoint(vision, screenshot, pigs, blocks);
 
-                    // If the target is very close to before, randomly choose a
-                    // point near it
-                    if (prevTarget != null && distance(prevTarget, _tpt) < 10) {
-                        double _angle = randomGenerator.nextDouble() * Math.PI * 2;
-                        _tpt.x = _tpt.x + (int) (Math.cos(_angle) * 10);
-                        _tpt.y = _tpt.y + (int) (Math.sin(_angle) * 10);
-                        System.out.println("Randomly changing to " + _tpt);
-                    }
-
-                    prevTarget = new Point(_tpt.x, _tpt.y);
-
-                    // Estimate the trajectory
-                    ArrayList<Point> pts = tp.estimateLaunchPoint(sling, _tpt);
-
-                    // Do a high shot when entering a level to find an accurate velocity
-                    if (firstShot && pts.size() > 1)
-                    {
-                        releasePoint = pts.get(1);
-                    }
-                    else if (pts.size() == 1)
-                        releasePoint = pts.get(0);
-                    else if (pts.size() == 2)
-                    {
-                        // randomly choose between the trajectories, with a 1 in
-                        // 6 chance of choosing the high one
-                        if (randomGenerator.nextInt(6) == 0)
-                            releasePoint = pts.get(1);
-                        else
-                            releasePoint = pts.get(0);
-                    }
-                    else
-                    if(pts.isEmpty())
-                    {
-                        System.out.println("No release point found for the target");
-                        System.out.println("Try a shot with 45 degree");
-                        releasePoint = tp.findReleasePoint(sling, Math.PI/4);
+                    if(result.size() == 2) {
+                        releasePoint = result.get(0);
+                        targetPoint = result.get(1);
                     }
 
                     // Get the reference point
@@ -326,7 +291,7 @@ public class XAgent implements Runnable {
                                 tapInterval =  60;
                         }
 
-                        int tapTime = tp.getTapTime(sling, releasePoint, _tpt, tapInterval);
+                        int tapTime = tp.getTapTime(sling, releasePoint, targetPoint, tapInterval);
                         dx = (int)releasePoint.getX() - refPoint.x;
                         dy = (int)releasePoint.getY() - refPoint.y;
                         shot = new Shot(refPoint.x, refPoint.y, dx, dy, 0, tapTime);
