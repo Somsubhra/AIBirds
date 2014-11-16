@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.HashMap;
 
 import ab.demo.other.ActionRobot;
 import ab.demo.other.Shot;
@@ -198,9 +199,26 @@ public class XAgent implements Runnable {
 
         ArrayList<Point> pts;
 
+        // A list of release points with their respective ranks
+        HashMap<Point, Integer> rankList = new HashMap<Point, Integer>();
+
         // Traverse the entire trajectory space based on the pigs
         for(int index = 0; index < numberOfPigs; index++) {
             ABObject pig = pigs.get(index);
+
+            int pigX = (int)pig.getX();
+            int pigY = (int)pig.getY();
+
+            int pigWidth = (int)pig.getWidth();
+            int pigHeight = (int)pig.getHeight();
+
+            for(int iterX = pigX; iterX <= pigX + pigWidth; iterX++) {
+                for(int iterY = pigY; iterY <= pigY + pigHeight; iterY++) {
+                    Point targetPoint = new Point(iterX, iterY);
+
+                    // TODO: Estimate launch points for entire dimension of pig
+                }
+            }
 
             Point targetPoint = pig.getCenter();
 
