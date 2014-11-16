@@ -207,27 +207,38 @@ public class XAgent implements Runnable {
             int pigWidth = pig.width;
             int pigHeight = pig.height;
 
+            // Iterate over the width of the pig
             for(int iterX = pigX; iterX <= pigX + pigWidth; iterX++) {
+
+                // Iterate over the height of the pig
                 for(int iterY = pigY; iterY <= pigY + pigHeight; iterY++) {
 
                     Point targetPoint = new Point(iterX, iterY);
 
-                    ArrayList<Point> newLaunchPoints = tp.estimateLaunchPoint(vision.findSlingshotMBR(), targetPoint);
-
                     Set<Point> launchPoints = rankList.keySet();
-
+                    
+                    ArrayList<Point> newLaunchPoints = tp.estimateLaunchPoint(vision.findSlingshotMBR(), targetPoint);
                     int newLaunchPointNo = newLaunchPoints.size();
 
+                    // Iterate over all the possible launch points calculated
                     for(int iterLPts = 0; iterLPts < newLaunchPointNo; iterLPts++) {
                         Point newLaunchPoint = newLaunchPoints.get(iterLPts);
 
+                        boolean inRankList = false;
+
+                        // Iterate over all the launch points already in the rank list
                         for(Iterator<Point> it = launchPoints.iterator(); it.hasNext(); ) {
                             Point launchPoint = it.next();
 
-                            // TODO: Initialize point in rank list if it is a new entry
                             if (launchPoint.x == newLaunchPoint.x && launchPoint.y == newLaunchPoint.y) {
+                                inRankList = true;
                                 rankList.put(launchPoint, rankList.get(launchPoint) + 1);
                             }
+                        }
+
+                        // Initialize launch point in rank list if it is a new entry
+                        if(!inRankList) {
+                            rankList.put(newLaunchPoint, 1);
                         }
                     }
                 }
