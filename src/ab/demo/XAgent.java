@@ -3,12 +3,7 @@ package ab.demo;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.HashMap;
+import java.util.*;
 
 import ab.demo.other.ActionRobot;
 import ab.demo.other.Shot;
@@ -206,17 +201,35 @@ public class XAgent implements Runnable {
         for(int index = 0; index < numberOfPigs; index++) {
             ABObject pig = pigs.get(index);
 
-            int pigX = (int)pig.getX();
-            int pigY = (int)pig.getY();
+            int pigX = pig.x;
+            int pigY = pig.y;
 
-            int pigWidth = (int)pig.getWidth();
-            int pigHeight = (int)pig.getHeight();
+            int pigWidth = pig.width;
+            int pigHeight = pig.height;
 
             for(int iterX = pigX; iterX <= pigX + pigWidth; iterX++) {
                 for(int iterY = pigY; iterY <= pigY + pigHeight; iterY++) {
+
                     Point targetPoint = new Point(iterX, iterY);
 
-                    // TODO: Estimate launch points for entire dimension of pig
+                    ArrayList<Point> newLaunchPoints = tp.estimateLaunchPoint(vision.findSlingshotMBR(), targetPoint);
+
+                    Set<Point> launchPoints = rankList.keySet();
+
+                    int newLaunchPointNo = newLaunchPoints.size();
+
+                    for(int iterLPts = 0; iterLPts < newLaunchPointNo; iterLPts++) {
+                        Point newLaunchPoint = newLaunchPoints.get(iterLPts);
+
+                        for(Iterator<Point> it = launchPoints.iterator(); it.hasNext(); ) {
+                            Point launchPoint = it.next();
+
+                            // TODO: Initialize point in rank list if it is a new entry
+                            if (launchPoint.x == newLaunchPoint.x && launchPoint.y == newLaunchPoint.y) {
+                                rankList.put(launchPoint, rankList.get(launchPoint) + 1);
+                            }
+                        }
+                    }
                 }
             }
 
