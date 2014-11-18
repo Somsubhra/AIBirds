@@ -3,11 +3,7 @@ package ab.demo;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 import ab.demo.other.ActionRobot;
 import ab.demo.other.Shot;
@@ -190,10 +186,82 @@ public class XAgent implements Runnable {
         return blocksList;
     }
 
+    public ArrayList<Point> getReleasePoint(Vision vision, BufferedImage screenShot, List<ABObject> pigs, List<ABBlock> blocks) {
+
+        ArrayList<Point> result = new ArrayList<Point>();
+
+        int numberOfPigs = pigs.size();
+
+        ArrayList<Point> pts;
+
+        // A list of release points with their respective ranks
+        HashMap<Point, Integer> rankList = new HashMap<Point, Integer>();
+
+        // Traverse the entire trajectory space based on the pigs
+        for(int index = 0; index < numberOfPigs; index++) {
+            ABObject pig = pigs.get(index);
+
+            int pigX = pig.x;
+            int pigY = pig.y;
+
+            int pigWidth = pig.width;
+            int pigHeight = pig.height;
+
+            // Iterate over the width of the pig
+            for(int iterX = pigX; iterX <= pigX + pigWidth; iterX++) {
+
+                // Iterate over the height of the pig
+                for(int iterY = pigY; iterY <= pigY + pigHeight; iterY++) {
+
+                    Point targetPoint = new Point(iterX, iterY);
+
+                    Set<Point> launchPoints = rankList.keySet();
+                    
+                    ArrayList<Point> newLaunchPoints = tp.estimateLaunchPoint(vision.findSlingshotMBR(), targetPoint);
+                    int newLaunchPointNo = newLaunchPoints.size();
+
+                    // Iterate over all the possible launch points calculated
+                    for(int iterLPts = 0; iterLPts < newLaunchPointNo; iterLPts++) {
+                        Point newLaunchPoint = newLaunchPoints.get(iterLPts);
+
+                        boolean inRankList = false;
+
+                        // Iterate over all the launch points already in the rank list
+                        for(Iterator<Point> it = launchPoints.iterator(); it.hasNext(); ) {
+                            Point launchPoint = it.next();
+
+                            if (launchPoint.x == newLaunchPoint.x && launchPoint.y == newLaunchPoint.y) {
+                                inRankList = true;
+                                rankList.put(launchPoint, rankList.get(launchPoint) + 1);
+                            }
+                        }
+
+                        // Initialize launch point in rank list if it is a new entry
+                        if(!inRankList) {
+                            rankList.put(newLaunchPoint, 1);
+                        }
+                    }
+                }
+            }
+
+            Point targetPoint = pig.getCenter();
+
+            pts = tp.estimateLaunchPoint(vision.findSlingshotMBR(), targetPoint);
+
+            result.add(pts.get(0));
+            result.add(targetPoint);
+        }
+
+        return result;
+    }
+
     public GameState solve() {
 
         // Capture the image
         BufferedImage screenshot = ActionRobot.doScreenShot();
+
+        int sceneWidth = screenshot.getWidth();
+        int sceneHeight = screenshot.getHeight();
 
         // Process the image
         Vision vision = new Vision(screenshot);
@@ -212,11 +280,6 @@ public class XAgent implements Runnable {
         // Get all the blocks
         List<ABBlock> blocks = this.blocks(vision);
 
-        // Dump the block objects on console
-        for(ABBlock block : blocks) {
-            block.dumpVars();
-        }
-
         // Get all the pigs
         List<ABObject> pigs = vision.findPigsMBR();
 
@@ -228,66 +291,17 @@ public class XAgent implements Runnable {
             if(!pigs.isEmpty()) {
 
                 Point releasePoint = null;
+                Point targetPoint = null;
+
                 Shot shot = new Shot();
                 int dx, dy;
 
                 {
-                    // Pick up the topmost pig
+                    ArrayList<Point> result = this.getReleasePoint(vision, screenshot, pigs, blocks);
 
-                    int numberOfPigs = pigs.size();
-
-                    ABObject topmostPig = null;
-
-                    if(numberOfPigs > 0) {
-
-                        topmostPig = pigs.get(0);
-
-                        for (int index = 1; index < numberOfPigs; index++) {
-
-                            ABObject currentPig = pigs.get(index);
-
-                            // If the current top most pig has y co-ordinate greater than the other pig
-                            // then the other pig is at a greater height
-                            if(topmostPig.getCenter().getY() > currentPig.getCenter().getY()) {
-                                topmostPig = currentPig;
-                            }
-                        }
-                    }
-
-                    Point _tpt = topmostPig.getCenter();
-
-                    // If the target is very close to before, randomly choose a
-                    // point near it
-                    if (prevTarget != null && distance(prevTarget, _tpt) < 10) {
-                        double _angle = randomGenerator.nextDouble() * Math.PI * 2;
-                        _tpt.x = _tpt.x + (int) (Math.cos(_angle) * 10);
-                        _tpt.y = _tpt.y + (int) (Math.sin(_angle) * 10);
-                        System.out.println("Randomly changing to " + _tpt);
-                    }
-
-                    prevTarget = new Point(_tpt.x, _tpt.y);
-
-                    // Estimate the trajectory
-                    ArrayList<Point> pts = tp.estimateLaunchPoint(sling, _tpt);
-
-                    // Do a high shot when entering a level to find an accurate velocity
-                    if (firstShot && pts.size() > 1)
-                    {
-                        releasePoint = pts.get(1);
-                    }
-                    else if (pts.size() == 1)
-                        releasePoint = pts.get(0);
-                    else if (pts.size() == 2)
-                    {
-                        // Choose the trajectory with the higher angle
-                        releasePoint = pts.get(1);
-                    }
-                    else
-                    if(pts.isEmpty())
-                    {
-                        System.out.println("No release point found for the target");
-                        System.out.println("Try a shot with 45 degree");
-                        releasePoint = tp.findReleasePoint(sling, Math.PI/4);
+                    if(result.size() == 2) {
+                        releasePoint = result.get(0);
+                        targetPoint = result.get(1);
                     }
 
                     // Get the reference point
@@ -319,7 +333,7 @@ public class XAgent implements Runnable {
                                 tapInterval =  60;
                         }
 
-                        int tapTime = tp.getTapTime(sling, releasePoint, _tpt, tapInterval);
+                        int tapTime = tp.getTapTime(sling, releasePoint, targetPoint, tapInterval);
                         dx = (int)releasePoint.getX() - refPoint.x;
                         dy = (int)releasePoint.getY() - refPoint.y;
                         shot = new Shot(refPoint.x, refPoint.y, dx, dy, 0, tapTime);
