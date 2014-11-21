@@ -258,17 +258,30 @@ public class XAgent implements Runnable {
         }
 
         // Find the launch points with the maximum pigs lying on their path
-        
-        System.out.println(maxNoPigs);
+        ArrayList<ArrayList<Point>> resLaunchPoints = new ArrayList<ArrayList<Point>>();
 
-        Point targetPoint = pig.getCenter();
+        for(Iterator<Point> it = launchPoints.iterator(); it.hasNext(); ) {
+            Point launchPoint = it.next();
 
-        pts = tp.estimateLaunchPoint(vision.findSlingshotMBR(), targetPoint);
+            int pigsOnTraj = rankList.get(launchPoint).size();
 
-        result.add(pts.get(0));
-        result.add(targetPoint);
+            if(pigsOnTraj == maxNoPigs) {
+                ArrayList<Point> record = new ArrayList<Point>();
+                record.add(launchPoint);
 
-        return result;
+                // TODO: Find the farthest point and add that as the target point
+                record.add(rankList.get(launchPoint).iterator().next());
+
+                resLaunchPoints.add(record);
+            }
+        }
+
+        System.out.println(resLaunchPoints);
+
+        // Calculate the weighted score of the resultant launch points
+        // Rank the resultant launch points based on their weighted score
+
+        return resLaunchPoints.iterator().next();
     }
 
     public GameState solve() {
