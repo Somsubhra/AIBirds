@@ -260,15 +260,26 @@ public class XAgent implements Runnable {
         List<ABObject> blocks = vision.findBlocksMBR();
         int numberOfBlocks = blocks.size();
 
+        int cnt = 0;
+
         // Iterate over all the blocks
         for(int index = 0; index < numberOfBlocks; index++) {
+
             ABObject block = blocks.get(index);
+
+            ABType type = block.getType();
+
+            if(type != ABType.Ice && type != ABType.Wood && type != ABType.Stone) {
+                continue;
+            }
 
             int blockX = block.x;
             int blockY = block.y;
 
             int blockWidth = block.width;
             int blockHeight = block.height;
+
+            boolean onTrajectory = false;
 
             // Iterate over the width of the block
             for(int iterX = blockX; iterX <= blockX + blockWidth; iterX++) {
@@ -277,11 +288,33 @@ public class XAgent implements Runnable {
                 for(int iterY = blockY; iterY <= blockY + blockHeight; iterY++) {
 
                     Point targetPoint = new Point(iterX, iterY);
-                    
+
+                    ArrayList<Point> newLaunchPoints = tp.estimateLaunchPoint(vision.findSlingshotMBR(), targetPoint);
+                    int newLaunchPointsNo = newLaunchPoints.size();
+
+                    // Iterate over all the possible launch points calculated
+                    for(int iterLPts = 0; iterLPts < newLaunchPointsNo; iterLPts++) {
+                        Point newLaunchPoint = newLaunchPoints.get(iterLPts);
+
+                        // If block is on trajectory
+                        if(resLaunchPointsList.contains(newLaunchPoint)) {
+                            onTrajectory = true;
+                        }
+                    }
                 }
             }
-        }
 
+            // Simple little hack to prevent hanging of the shot
+            cnt++;
+
+            if(cnt == 15) {
+                break;
+            }
+
+            if(onTrajectory) {
+                System.out.println(block.id + " on trajectory " + block.type);
+            }
+        }
 
         // Rank the resultant launch points based on their weighted score
 
