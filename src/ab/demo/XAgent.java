@@ -278,10 +278,15 @@ public class XAgent implements Runnable {
 
         System.out.println(resLaunchPoints);
 
+        // If there is only one resultant launch point return that
+        if(resLaunchPoints.size() == 1) {
+            return resLaunchPoints.get(0);
+        }
+
         // Calculate the weighted score of the resultant launch points
         // Rank the resultant launch points based on their weighted score
 
-        return resLaunchPoints.iterator().next();
+        return resLaunchPoints.get(0);
     }
 
     public GameState solve() {
