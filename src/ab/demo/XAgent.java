@@ -258,6 +258,8 @@ public class XAgent implements Runnable {
         }
 
         // Find the launch points with the maximum pigs lying on their path
+
+        // List of results with launch point at index 0 and target point at index 1
         ArrayList<ArrayList<Point>> resLaunchPoints = new ArrayList<ArrayList<Point>>();
 
         for(Iterator<Point> it = launchPoints.iterator(); it.hasNext(); ) {
@@ -269,14 +271,24 @@ public class XAgent implements Runnable {
                 ArrayList<Point> record = new ArrayList<Point>();
                 record.add(launchPoint);
 
-                // TODO: Find the farthest point and add that as the target point
-                record.add(rankList.get(launchPoint).iterator().next());
+                // Find the farthest point and add that as the target point
+                Set<Point> resTargetPoints = rankList.get(launchPoint);
 
+                Point farthestPoint = resTargetPoints.iterator().next();
+
+                for(Iterator<Point> it1 = resTargetPoints.iterator(); it1.hasNext(); ) {
+                    Point nextPoint = it1.next();
+                    if(nextPoint.x > farthestPoint.x) {
+                        farthestPoint = nextPoint;
+                    }
+                }
+
+                record.add(farthestPoint);
+
+                // Add the record to the result
                 resLaunchPoints.add(record);
             }
         }
-
-        System.out.println(resLaunchPoints);
 
         // If there is only one resultant launch point return that
         if(resLaunchPoints.size() == 1) {
@@ -286,6 +298,7 @@ public class XAgent implements Runnable {
         // Calculate the weighted score of the resultant launch points
         // Rank the resultant launch points based on their weighted score
 
+        System.out.println(resLaunchPoints.get(0));
         return resLaunchPoints.get(0);
     }
 
