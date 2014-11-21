@@ -195,11 +195,13 @@ public class XAgent implements Runnable {
         ArrayList<Point> pts;
 
         // A list of release points with their respective ranks
-        HashMap<Point, Set<Integer>> rankList = new HashMap<Point, Set<Integer>>();
+        HashMap<Point, Set<Point>> rankList = new HashMap<Point, Set<Point>>();
+
+        ABObject pig = null;
 
         // Traverse the entire trajectory space based on the pigs
         for(int index = 0; index < numberOfPigs; index++) {
-            ABObject pig = pigs.get(index);
+            pig = pigs.get(index);
 
             int pigX = pig.x;
             int pigY = pig.y;
@@ -229,25 +231,42 @@ public class XAgent implements Runnable {
 
                         // If launch point does not appear in the key set then initialize it
                         if(!inRankList) {
-                            Set<Integer> s = new HashSet<Integer>();
-                            s.add(pig.id);
+                            Set<Point> s = new HashSet<Point>();
+                            s.add(pig.getCenter());
                             rankList.put(newLaunchPoint, s);
                         } else {
-                            rankList.get(newLaunchPoint).add(pig.id);
+                            rankList.get(newLaunchPoint).add(pig.getCenter());
                         }
                     }
                 }
             }
-
-            System.out.println(rankList);
-
-            Point targetPoint = pig.getCenter();
-
-            pts = tp.estimateLaunchPoint(vision.findSlingshotMBR(), targetPoint);
-
-            result.add(pts.get(0));
-            result.add(targetPoint);
         }
+
+        // Find the maximum number of pigs lying on one particular trajectory
+        Set<Point> launchPoints = rankList.keySet();
+
+        int maxNoPigs = 0;
+
+        for(Iterator<Point> it = launchPoints.iterator(); it.hasNext(); ) {
+            Point launchPoint = it.next();
+
+            int pigsOnTraj = rankList.get(launchPoint).size();
+
+            if(pigsOnTraj > maxNoPigs) {
+                maxNoPigs = pigsOnTraj;
+            }
+        }
+
+        // Find the launch points with the maximum pigs lying on their path
+        
+        System.out.println(maxNoPigs);
+
+        Point targetPoint = pig.getCenter();
+
+        pts = tp.estimateLaunchPoint(vision.findSlingshotMBR(), targetPoint);
+
+        result.add(pts.get(0));
+        result.add(targetPoint);
 
         return result;
     }
