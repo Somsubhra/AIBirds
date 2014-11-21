@@ -195,7 +195,7 @@ public class XAgent implements Runnable {
         ArrayList<Point> pts;
 
         // A list of release points with their respective ranks
-        HashMap<Point, Integer> rankList = new HashMap<Point, Integer>();
+        HashMap<Point, Set<Integer>> rankList = new HashMap<Point, Set<Integer>>();
 
         // Traverse the entire trajectory space based on the pigs
         for(int index = 0; index < numberOfPigs; index++) {
@@ -232,17 +232,21 @@ public class XAgent implements Runnable {
 
                             if (launchPoint.x == newLaunchPoint.x && launchPoint.y == newLaunchPoint.y) {
                                 inRankList = true;
-                                rankList.put(launchPoint, rankList.get(launchPoint) + 1);
+                                rankList.get(launchPoint).add(pig.id);
                             }
                         }
 
                         // Initialize launch point in rank list if it is a new entry
                         if(!inRankList) {
-                            rankList.put(newLaunchPoint, 1);
+                            Set<Integer> s = new HashSet<Integer>();
+                            s.add(pig.id);
+                            rankList.put(newLaunchPoint, s);
                         }
                     }
                 }
             }
+
+            System.out.println(rankList);
 
             Point targetPoint = pig.getCenter();
 
