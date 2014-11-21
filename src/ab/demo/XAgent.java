@@ -222,25 +222,18 @@ public class XAgent implements Runnable {
 
                     // Iterate over all the possible launch points calculated
                     for(int iterLPts = 0; iterLPts < newLaunchPointNo; iterLPts++) {
+
                         Point newLaunchPoint = newLaunchPoints.get(iterLPts);
 
-                        boolean inRankList = false;
+                        boolean inRankList = launchPoints.contains(newLaunchPoint);
 
-                        // Iterate over all the launch points already in the rank list
-                        for(Iterator<Point> it = launchPoints.iterator(); it.hasNext(); ) {
-                            Point launchPoint = it.next();
-
-                            if (launchPoint.x == newLaunchPoint.x && launchPoint.y == newLaunchPoint.y) {
-                                inRankList = true;
-                                rankList.get(launchPoint).add(pig.id);
-                            }
-                        }
-
-                        // Initialize launch point in rank list if it is a new entry
+                        // If launch point does not appear in the key set then initialize it
                         if(!inRankList) {
                             Set<Integer> s = new HashSet<Integer>();
                             s.add(pig.id);
                             rankList.put(newLaunchPoint, s);
+                        } else {
+                            rankList.get(newLaunchPoint).add(pig.id);
                         }
                     }
                 }
