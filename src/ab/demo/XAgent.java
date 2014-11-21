@@ -100,99 +100,12 @@ public class XAgent implements Runnable {
                         * (p1.y - p2.y)));
     }
 
-    /**
-     * The class/structure representing a block
-     */
-    private class ABBlock {
+    public ArrayList<Point> getReleasePoint(Vision vision) {
 
-        /**
-         * The block number
-         */
-        public int number;
+        List<ABObject> blocks = vision.findBlocksMBR();
 
-        /**
-         * The shape of the block
-         */
-        public String shape;
-
-        /**
-         * The material of the block
-         */
-        public String material;
-
-        /**
-         * Dump the variables on screen
-         */
-        public void dumpVars() {
-            System.out.println("Block number: " + number);
-            System.out.println("Block shape: " + shape);
-            System.out.println("Block material: " + material);
-            System.out.println();
-        }
-    }
-
-    /**
-     * Get all the blocks in the scene
-     * @param vision The vision object of the scene
-     * @return A list of blocks
-     */
-    private List<ABBlock> blocks(Vision vision) {
-
-        // Find all the blocks appearing in the scene
-        List<ABObject> objectsList = vision.findBlocksMBR();
-
-        List<ABBlock> blocksList = new ArrayList<ABBlock>();
-
-        // Iterate through all the blocks
-        for(ABObject object : objectsList) {
-
-            ABBlock block = new ABBlock();
-
-            // Set the block number
-            block.number = object.id;
-
-            // Set the block shape
-            ABShape shape = object.shape;
-
-            if(shape == ABShape.Circle) {
-                block.shape = "Circle";
-            } else if(shape == ABShape.Poly) {
-                block.shape = "Polygon";
-            } else if(shape == ABShape.Rect) {
-                block.shape = "Rectangle";
-            } else if(shape == ABShape.Triangle) {
-                block.shape = "Triangle";
-            } else {
-                block.shape = "Unknown";
-            }
-
-            // Set the block material
-            ABType material = object.type;
-
-            if(material == ABType.Stone) {
-                block.material = "Stone";
-            } else if(material == ABType.Wood) {
-                block.material = "Wood";
-            } else if(material == ABType.Ice) {
-                block.material = "Ice";
-            } else {
-                block.material = "Unknown";
-            }
-
-            // Append the block to the list
-            blocksList.add(block);
-        }
-
-        return blocksList;
-    }
-
-    public ArrayList<Point> getReleasePoint(Vision vision, BufferedImage screenShot, List<ABObject> pigs, List<ABBlock> blocks) {
-
-        ArrayList<Point> result = new ArrayList<Point>();
-
+        List<ABObject> pigs = vision.findPigsMBR();
         int numberOfPigs = pigs.size();
-
-        ArrayList<Point> pts;
 
         // A list of release points with their respective ranks
         HashMap<Point, Set<Point>> rankList = new HashMap<Point, Set<Point>>();
@@ -324,9 +237,6 @@ public class XAgent implements Runnable {
             sling = vision.findSlingshotMBR();
         }
 
-        // Get all the blocks
-        List<ABBlock> blocks = this.blocks(vision);
-
         // Get all the pigs
         List<ABObject> pigs = vision.findPigsMBR();
 
@@ -344,7 +254,7 @@ public class XAgent implements Runnable {
                 int dx, dy;
 
                 {
-                    ArrayList<Point> result = this.getReleasePoint(vision, screenshot, pigs, blocks);
+                    ArrayList<Point> result = this.getReleasePoint(vision);
 
                     if(result.size() == 2) {
                         releasePoint = result.get(0);
