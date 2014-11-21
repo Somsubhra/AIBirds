@@ -174,6 +174,9 @@ public class XAgent implements Runnable {
         // List of just the launch points
         ArrayList<Point> resLaunchPointsList = new ArrayList<Point>();
 
+        // List of just the target points
+        ArrayList<Point> resTargetPointsList = new ArrayList<Point>();
+
         for(Iterator<Point> it = launchPoints.iterator(); it.hasNext(); ) {
             Point launchPoint = it.next();
 
@@ -198,6 +201,8 @@ public class XAgent implements Runnable {
                     }
                 }
 
+                resTargetPointsList.add(farthestPoint);
+
                 record.add(farthestPoint);
 
                 // Add the record to the result
@@ -214,14 +219,14 @@ public class XAgent implements Runnable {
 
         /* Few rules about different colored birds' behavior
          *
-         * 1. Blue bird works best against glass
+         * 1. Blue bird works best against Ice
          * 2. Yellow and white birds work best against wood
          * 3. Black bird works best against stone
          *
          * Code:
          * Red - 0, Blue - 1, Yellow - 2, White - 3, Black - 5
-         * Glass - 0, Wood - 1, Stone - 2
-         * Before - 0, After - 1
+         * Ice - 0, Wood - 1, Stone - 2
+         * Pig is Before - 0, After - 1
         */
 
         // Define weights
@@ -262,12 +267,55 @@ public class XAgent implements Runnable {
 
         int cnt = 0;
 
+        ABType birdType = aRobot.getBirdTypeOnSling();
+        int birdCode = 0;
+
+        switch (birdType) {
+            case RedBird:
+                birdCode = 0;
+                break;
+            case BlueBird:
+                birdCode = 1;
+                break;
+            case YellowBird:
+                birdCode = 2;
+                break;
+            case WhiteBird:
+                birdCode = 3;
+                break;
+            case BlackBird:
+                birdCode = 4;
+                break;
+            default:
+                break;
+        }
+
+        // Contains weighted scores of trajectories
+        HashMap<Point, Integer> LPScores = new HashMap<Point, Integer>();
+
         // Iterate over all the blocks
         for(int index = 0; index < numberOfBlocks; index++) {
 
             ABObject block = blocks.get(index);
 
             ABType type = block.getType();
+
+            ABType blockType = block.getType();
+            int blockCode = 0;
+
+            switch (blockType) {
+                case Ice:
+                    blockCode = 0;
+                    break;
+                case Wood:
+                    blockCode = 1;
+                    break;
+                case Stone:
+                    blockCode = 2;
+                    break;
+                default:
+                    break;
+            }
 
             if(type != ABType.Ice && type != ABType.Wood && type != ABType.Stone) {
                 continue;
@@ -280,6 +328,10 @@ public class XAgent implements Runnable {
             int blockHeight = block.height;
 
             boolean onTrajectory = false;
+
+            Point targetPig = null;
+
+            ArrayList<Point> LPToIncr = new ArrayList<Point>();
 
             // Iterate over the width of the block
             for(int iterX = blockX; iterX <= blockX + blockWidth; iterX++) {
@@ -298,7 +350,9 @@ public class XAgent implements Runnable {
 
                         // If block is on trajectory
                         if(resLaunchPointsList.contains(newLaunchPoint)) {
+                            LPToIncr.add(newLaunchPoint);
                             onTrajectory = true;
+                            targetPig = resTargetPointsList.get(resLaunchPointsList.indexOf(newLaunchPoint));
                         }
                     }
                 }
@@ -312,9 +366,31 @@ public class XAgent implements Runnable {
             }
 
             if(onTrajectory) {
-                System.out.println(block.id + " on trajectory " + block.type);
+
+                int locationCode = 0;
+                if(targetPig.x < targetPig.x) {
+                    locationCode = 0;
+                } else {
+                    locationCode = 1;
+                }
+
+                int weight = weights[birdCode][blockCode][locationCode];
+
+                int noLPToIncr = LPToIncr.size();
+                for(int iter1 = 0; iter1 < noLPToIncr; iter1++) {
+
+                    Point lp = LPToIncr.get(iter1);
+
+                    if(LPScores.containsKey(lp)) {
+                        LPScores.put(lp, LPScores.get(lp) + weight);
+                    } else {
+                        LPScores.put(lp, weight);
+                    }
+                }
             }
         }
+
+        System.out.println(LPScores);
 
         // Rank the resultant launch points based on their weighted score
 
