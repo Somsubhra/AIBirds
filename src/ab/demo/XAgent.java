@@ -209,6 +209,52 @@ public class XAgent implements Runnable {
         }
 
         // Calculate the weighted score of the resultant launch points
+
+        /* Few rules about different colored birds' behavior
+         *
+         * 1. Blue bird works best against glass
+         * 2. Yellow and white birds work best against wood
+         * 3. Black bird works best against stone
+         *
+         * Code:
+         * Red - 0, Blue - 1, Yellow - 2, White - 3, Black - 5
+         * Glass - 0, Wood - 1, Stone - 2
+         * Before - 0, After - 1
+        */
+
+        // Define weights
+        int[][][] weights = new int[5][3][2];
+        weights[0][0][0] = 6;
+        weights[0][0][1] = 3;
+        weights[0][1][0] = 6;
+        weights[0][1][1] = 3;
+        weights[0][2][0] = 6;
+        weights[0][2][1] = 3;
+        weights[1][0][0] = 9;
+        weights[1][0][1] = 6;
+        weights[1][1][0] = 6;
+        weights[1][1][1] = 3;
+        weights[1][2][0] = 6;
+        weights[1][2][1] = 3;
+        weights[2][0][0] = 6;
+        weights[2][0][1] = 3;
+        weights[2][1][0] = 9;
+        weights[2][1][1] = 6;
+        weights[2][2][0] = 6;
+        weights[2][2][1] = 3;
+        weights[3][0][0] = 6;
+        weights[3][0][1] = 3;
+        weights[3][1][0] = 9;
+        weights[3][1][1] = 6;
+        weights[3][2][0] = 6;
+        weights[3][2][1] = 3;
+        weights[4][0][0] = 6;
+        weights[4][0][1] = 3;
+        weights[4][1][0] = 6;
+        weights[4][1][1] = 3;
+        weights[4][2][0] = 9;
+        weights[4][2][1] = 6;
+
         // Rank the resultant launch points based on their weighted score
 
         System.out.println(resLaunchPoints.get(0));
