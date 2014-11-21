@@ -102,19 +102,15 @@ public class XAgent implements Runnable {
 
     public ArrayList<Point> getReleasePoint(Vision vision) {
 
-        List<ABObject> blocks = vision.findBlocksMBR();
-
         List<ABObject> pigs = vision.findPigsMBR();
         int numberOfPigs = pigs.size();
 
         // A list of release points with their respective ranks
         HashMap<Point, Set<Point>> rankList = new HashMap<Point, Set<Point>>();
 
-        ABObject pig = null;
-
         // Traverse the entire trajectory space based on the pigs
         for(int index = 0; index < numberOfPigs; index++) {
-            pig = pigs.get(index);
+            ABObject pig = pigs.get(index);
 
             int pigX = pig.x;
             int pigY = pig.y;
@@ -175,12 +171,18 @@ public class XAgent implements Runnable {
         // List of results with launch point at index 0 and target point at index 1
         ArrayList<ArrayList<Point>> resLaunchPoints = new ArrayList<ArrayList<Point>>();
 
+        // List of just the launch points
+        ArrayList<Point> resLaunchPointsList = new ArrayList<Point>();
+
         for(Iterator<Point> it = launchPoints.iterator(); it.hasNext(); ) {
             Point launchPoint = it.next();
 
             int pigsOnTraj = rankList.get(launchPoint).size();
 
             if(pigsOnTraj == maxNoPigs) {
+
+                resLaunchPointsList.add(launchPoint);
+
                 ArrayList<Point> record = new ArrayList<Point>();
                 record.add(launchPoint);
 
@@ -254,6 +256,32 @@ public class XAgent implements Runnable {
         weights[4][1][1] = 3;
         weights[4][2][0] = 9;
         weights[4][2][1] = 6;
+
+        List<ABObject> blocks = vision.findBlocksMBR();
+        int numberOfBlocks = blocks.size();
+
+        // Iterate over all the blocks
+        for(int index = 0; index < numberOfBlocks; index++) {
+            ABObject block = blocks.get(index);
+
+            int blockX = block.x;
+            int blockY = block.y;
+
+            int blockWidth = block.width;
+            int blockHeight = block.height;
+
+            // Iterate over the width of the block
+            for(int iterX = blockX; iterX <= blockX + blockWidth; iterX++) {
+
+                // Iterate over the height of the block
+                for(int iterY = blockY; iterY <= blockY + blockHeight; iterY++) {
+
+                    Point targetPoint = new Point(iterX, iterY);
+                    
+                }
+            }
+        }
+
 
         // Rank the resultant launch points based on their weighted score
 
