@@ -331,7 +331,7 @@ public class XAgent implements Runnable {
 
             Point targetPig = null;
 
-            ArrayList<Point> LPToIncr = new ArrayList<Point>();
+            Set<Point> LPToIncr = new HashSet<Point>();
 
             // Iterate over the width of the block
             for(int iterX = blockX; iterX <= blockX + blockWidth; iterX++) {
@@ -376,10 +376,8 @@ public class XAgent implements Runnable {
 
                 int weight = weights[birdCode][blockCode][locationCode];
 
-                int noLPToIncr = LPToIncr.size();
-                for(int iter1 = 0; iter1 < noLPToIncr; iter1++) {
-
-                    Point lp = LPToIncr.get(iter1);
+                for(Iterator<Point> it = LPToIncr.iterator(); it.hasNext(); ) {
+                    Point lp = it.next();
 
                     if(LPScores.containsKey(lp)) {
                         LPScores.put(lp, LPScores.get(lp) + weight);
