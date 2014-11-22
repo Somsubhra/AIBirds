@@ -376,6 +376,7 @@ public class XAgent implements Runnable {
 
                 int weight = weights[birdCode][blockCode][locationCode];
 
+                // Add weights to the trajectories
                 for(Iterator<Point> it = LPToIncr.iterator(); it.hasNext(); ) {
                     Point lp = it.next();
 
@@ -402,6 +403,7 @@ public class XAgent implements Runnable {
         Point finalLaunchPoint = maxEntry.getKey();
         Point finalTargetPoint = resTargetPointsList.get(resLaunchPointsList.indexOf(finalLaunchPoint));
 
+        // The final result
         ArrayList<Point> result = new ArrayList<Point>();
         result.add(finalLaunchPoint);
         result.add(finalTargetPoint);
