@@ -390,10 +390,25 @@ public class XAgent implements Runnable {
 
         System.out.println(LPScores);
 
-        // Rank the resultant launch points based on their weighted score
+        // Get the launch points with maximum weighted score
+        Map.Entry<Point, Integer> maxEntry = null;
 
-        System.out.println(resLaunchPoints.get(0));
-        return resLaunchPoints.get(0);
+        for(Map.Entry<Point, Integer> entry : LPScores.entrySet()) {
+            if(maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0) {
+                maxEntry = entry;
+            }
+        }
+
+        Point finalLaunchPoint = maxEntry.getKey();
+        Point finalTargetPoint = resTargetPointsList.get(resLaunchPointsList.indexOf(finalLaunchPoint));
+
+        ArrayList<Point> result = new ArrayList<Point>();
+        result.add(finalLaunchPoint);
+        result.add(finalTargetPoint);
+
+        System.out.println(result);
+
+        return result;
     }
 
     public GameState solve() {
